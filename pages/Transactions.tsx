@@ -4,12 +4,14 @@ import { FinanceContext } from '../App';
 const Transactions = () => {
   const { transactions } = useContext(FinanceContext);
   const [filter, setFilter] = useState('All');
-  const [amountRange, setAmountRange] = useState(1000);
+  const [amountRange, setAmountRange] = useState(0);
 
+  console.log(amountRange,"amountRange");
   const filteredTransactions = transactions.filter(t => {
       const matchesCategory = filter === 'All' || t.category === filter;
       const matchesAmount = Math.abs(t.amount) <= amountRange;
-      return matchesCategory && matchesAmount;
+      console.log(matchesAmount, amountRange, t.amount,"kkkkk");
+      return matchesCategory && (matchesAmount || !amountRange);
   });
 
   const categories = Array.from(new Set(transactions.map(t => t.category)));
@@ -19,6 +21,7 @@ const Transactions = () => {
       ...Array(4).fill(null), // Empty slots for start of month
       ...Array.from({length: 31}, (_, i) => i + 1)
   ];
+
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
