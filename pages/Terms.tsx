@@ -11,9 +11,7 @@ const Terms = () => {
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm py-4">
                 <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 font-extrabold text-xl tracking-tight text-slate-900">
-                        <div className="size-8 bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-                        </div>
+                        <img src="/logo.gif" alt="OwnFinance" className="size-8 rounded-lg shadow-lg shadow-blue-500/20" />
                         <span>OwnFinance<span className="text-blue-600">.</span></span>
                     </Link>
                     <Link to="/" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">

@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Dashboard from './Dashboard';
-import Transactions from './Transactions';
-import Upload from './Upload';
-import EmailSetup from './EmailSetup';
-import { FinanceContext } from '../App';
-import { MOCK_TRANSACTIONS, MOCK_CATEGORIES } from '../constants';
 
 // Declare gtag
 declare global {
@@ -43,6 +37,147 @@ const CAROUSEL_FEATURES = [
     image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop",
   }
 ];
+
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+
+// --- DATA & VISUALS ---
+const CHART_DATA = [
+  { name: 'Mon', spend: 4000 },
+  { name: 'Tue', spend: 3000 },
+  { name: 'Wed', spend: 2000 },
+  { name: 'Thu', spend: 2780 },
+  { name: 'Fri', spend: 1890 },
+  { name: 'Sat', spend: 6390 },
+  { name: 'Sun', spend: 3490 },
+];
+
+const RECENT_TRANSACTIONS = [
+  { id: 1, name: 'Netflix Subscription', date: 'Today, 9:41 AM', amount: -649, icon: 'movie', color: 'bg-red-100 text-red-600' },
+  { id: 2, name: 'Salary Credit', date: 'Yesterday, 5:00 PM', amount: 85000, icon: 'account_balance', color: 'bg-green-100 text-green-600' },
+  { id: 3, name: 'Grocery Store', date: 'Yesterday, 2:30 PM', amount: -2450, icon: 'shopping_cart', color: 'bg-orange-100 text-orange-600' },
+];
+
+const MockDashboard = () => (
+  <div className="w-full h-full bg-slate-50 p-4 md:p-6 flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200 shadow-inner">
+    {/* Header Stats */}
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-3 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wide">
+          <span className="material-symbols-outlined text-lg">account_balance_wallet</span>
+          Total Balance
+        </div>
+        <div className="text-3xl font-black text-slate-900">₹1,24,500</div>
+        <div className="text-xs font-medium text-green-600 mt-1 flex items-center gap-1">
+          <span className="material-symbols-outlined text-sm">trending_up</span>
+          +12.5% vs last month
+        </div>
+      </div>
+      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-3 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wide">
+          <span className="material-symbols-outlined text-lg">credit_card</span>
+          Monthly Spend
+        </div>
+        <div className="text-3xl font-black text-slate-900">₹42,390</div>
+        <div className="text-xs font-medium text-slate-400 mt-1">
+          45% of budget used
+        </div>
+      </div>
+    </div>
+
+    {/* Chart */}
+    <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col min-h-0">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-bold text-slate-800">Weekly Activity</h4>
+        <select className="bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium px-2 py-1 text-slate-600 outline-none">
+          <option>This Week</option>
+        </select>
+      </div>
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={CHART_DATA}>
+            <defs>
+              <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} dy={10} />
+            <Tooltip
+              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              cursor={{ stroke: '#cbd5e1', strokeDasharray: '4 4' }}
+            />
+            <Area type="monotone" dataKey="spend" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorSpend)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  </div>
+);
+
+const MockTransactions = () => (
+  <div className="w-full h-full bg-slate-50 p-4 md:p-6 overflow-hidden rounded-3xl border border-slate-200 shadow-inner flex flex-col">
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="font-bold text-xl text-slate-900">Recent Transactions</h3>
+      <button className="text-blue-600 text-sm font-bold hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">See All</button>
+    </div>
+
+    <div className="space-y-3 overflow-hidden relative">
+      {/* Fade overlay at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none z-10"></div>
+
+      {[...RECENT_TRANSACTIONS, ...RECENT_TRANSACTIONS].map((tx, i) => (
+        <div key={`${tx.id}-${i}`} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-blue-200 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className={`size-12 rounded-full ${tx.color} flex items-center justify-center`}>
+              <span className="material-symbols-outlined">{tx.icon}</span>
+            </div>
+            <div>
+              <div className="font-bold text-slate-800">{tx.name}</div>
+              <div className="text-xs font-medium text-slate-400">{tx.date}</div>
+            </div>
+          </div>
+          <div className={`font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-slate-900'}`}>
+            {tx.amount > 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const MockImport = () => (
+  <div className="w-full h-full flex flex-col md:flex-row bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-inner font-display">
+    {/* Upload Side */}
+    <div className="w-full md:w-1/2 p-8 bg-white border-b md:border-b-0 md:border-r border-slate-100 flex flex-col items-center justify-center text-center relative group">
+      <div className="absolute inset-4 border-2 border-dashed border-slate-200 rounded-2xl group-hover:border-blue-400 group-hover:bg-blue-50/50 transition-all duration-300 pointer-events-none"></div>
+
+      <div className="size-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform duration-300">
+        <span className="material-symbols-outlined text-4xl">upload_file</span>
+      </div>
+      <h3 className="font-bold text-lg text-slate-900 mb-2">Drop Statements Here</h3>
+      <p className="text-sm text-slate-500 max-w-[200px] leading-relaxed">
+        Support for HDFC, SBI, ICICI, and standard CSV formats.
+      </p>
+      <button className="mt-6 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg shadow-lg hover:bg-slate-800 transition-all">Browse Files</button>
+    </div>
+
+    {/* Email Side */}
+    <div className="w-full md:w-1/2 p-8 bg-slate-50 flex flex-col items-center justify-center text-center">
+      <div className="size-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-purple-100">
+        <span className="material-symbols-outlined text-4xl">mark_email_unread</span>
+      </div>
+      <h3 className="font-bold text-lg text-slate-900 mb-2">Sync with Email</h3>
+      <p className="text-sm text-slate-500 max-w-[200px] leading-relaxed">
+        Connect Gmail or Outlook to auto-parse receipts and bills.
+      </p>
+      <div className="flex gap-3 mt-6">
+        <div className="h-10 w-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-red-500 font-bold text-lg cursor-pointer hover:scale-110 transition-transform">G</div>
+        <div className="h-10 w-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-blue-500 font-bold text-lg cursor-pointer hover:scale-110 transition-transform">O</div>
+      </div>
+    </div>
+  </div>
+);
 
 const Landing = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -91,17 +226,9 @@ const Landing = () => {
         trackEvent('email_submission_success', { event_category: 'conversion', event_label: 'success', value: 1 });
         setTimeout(() => {
           setShowRegister(false);
-          navigate('/app');
-        }, 1000);
+        }, 2000);
       }, 1500);
     }
-  };
-
-  const mockContextValue = {
-    transactions: MOCK_TRANSACTIONS,
-    categories: MOCK_CATEGORIES,
-    addTransaction: () => { },
-    deleteCategory: () => { }
   };
 
   return (
@@ -153,10 +280,8 @@ const Landing = () => {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-3 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm' : 'py-6 bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
           <div className="flex items-center gap-3 font-extrabold text-xl tracking-tight text-slate-900 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="size-10 bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <span className="material-symbols-outlined">account_balance_wallet</span>
-            </div>
-            <span>OwnFinance<span className="text-blue-600">.</span></span>
+            <img src="/logo.gif" alt="OwnFinance" className="size-10 rounded-xl shadow-lg shadow-blue-500/20" />
+            <span>OwnFinance</span>
           </div>
 
           <div className="flex items-center gap-8">
@@ -169,7 +294,6 @@ const Landing = () => {
               ))}
             </nav>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/app')} className="hidden md:block text-slate-600 font-bold text-sm hover:text-slate-900">Login</button>
               <button
                 onClick={() => setShowRegister(true)}
                 className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 hover:shadow-lg transition-all active:scale-95"
@@ -234,37 +358,34 @@ const Landing = () => {
           <div className="flex flex-col lg:flex-row gap-8 h-[700px] lg:h-[600px]">
             {/* Visual Side */}
             <div className="w-full lg:w-2/3 h-1/2 lg:h-full relative rounded-3xl overflow-hidden bg-slate-800 border border-white/5 shadow-inner">
-              <FinanceContext.Provider value={mockContextValue}>
-                {CAROUSEL_FEATURES.map((feature, idx) => (
-                  <div
-                    key={feature.id}
-                    className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${idx === activeIndex ? 'translate-x-0 opacity-100' :
-                      idx < activeIndex ? '-translate-x-full opacity-0' : 'translate-x-full opacity-0'
-                      }`}
-                  >
-                    {feature.id === 'dashboard' ? (
-                      <div className="w-full h-full transform scale-[0.65] origin-top-left p-4 pointer-events-none select-none w-[153%] h-[153%] bg-slate-50">
-                        <Dashboard />
-                      </div>
-                    ) : feature.id === 'tracking' ? (
-                      <div className="w-full h-full transform scale-[0.65] origin-top-left p-4 pointer-events-none select-none w-[153%] h-[153%] bg-slate-50">
-                        <Transactions />
-                      </div>
-                    ) : feature.id === 'import' ? (
-                      <div className="w-full h-full flex transform scale-[0.65] origin-top-left w-[153%] h-[153%] pointer-events-none">
-                        <div className="w-1/2 p-4 bg-white border-r border-slate-100"><Upload /></div>
-                        <div className="w-1/2 p-4 bg-slate-50"><EmailSetup useType="landing" /></div>
-                      </div>
-                    ) : (
-                      <div className="w-full h-full">
-                        <img src={feature.image} className="w-full h-full object-cover opacity-80" alt={feature.title} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
-                      </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-800 to-transparent lg:hidden"></div>
-                  </div>
-                ))}
-              </FinanceContext.Provider>
+              {CAROUSEL_FEATURES.map((feature, idx) => (
+                <div
+                  key={feature.id}
+                  className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${idx === activeIndex ? 'translate-x-0 opacity-100' :
+                    idx < activeIndex ? '-translate-x-full opacity-0' : 'translate-x-full opacity-0'
+                    }`}
+                >
+                  {feature.id === 'dashboard' ? (
+                    <div className="w-full h-full p-8 md:p-12 pointer-events-none select-none">
+                      <MockDashboard />
+                    </div>
+                  ) : feature.id === 'tracking' ? (
+                    <div className="w-full h-full p-8 md:p-12 pointer-events-none select-none">
+                      <MockTransactions />
+                    </div>
+                  ) : feature.id === 'import' ? (
+                    <div className="w-full h-full p-8 md:p-12 pointer-events-none select-none">
+                      <MockImport />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full">
+                      <img src={feature.image} className="w-full h-full object-cover opacity-80" alt={feature.title} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-800 to-transparent lg:hidden"></div>
+                </div>
+              ))}
             </div>
 
             {/* Content Side */}
@@ -301,18 +422,28 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: 'smart_toy', title: 'AI Assistant', desc: 'Chat with your finances. Ask "How much did I spend on coffee?" and get instant answers powered by local AI.' },
-              { icon: 'lock_person', title: 'Local Encryption', desc: 'Bank-grade encryption on your device. We maximize security by minimizing data exposure.' },
-              { icon: 'calendar_month', title: 'Smart Budgeting', desc: 'Auto-generated budgets based on your spending habits. Stay on track effortlessly.' },
+              { icon: 'event_repeat', title: 'Subscription Manager', desc: 'Never miss a payment. Track recurring bills and cancel unwanted subscriptions.' },
+              { icon: 'category', title: 'Smart Categorization', desc: 'Clean & categorize messy bank statements automatically for accurate tracking.' },
               { icon: 'cloud_upload', title: 'Universal Import', desc: 'Supports PDF statements from HDFC, SBI, ICICI, and more. Plus CSV and email-based parsing.' },
+
+              { icon: 'smart_toy', title: 'AI Assistant', desc: 'Chat with your finances. Ask "How much did I spend on coffee?" and get instant answers powered by local AI.', comingSoon: true },
+              { icon: 'lock_person', title: 'Local Encryption', desc: 'Bank-grade encryption on your device. We maximize security by minimizing data exposure.' },
+              { icon: 'handshake', title: 'Lend & Borrow', desc: 'Track loans and debts. Keep tabs on shared expenses and know exactly who owes you what.' },
+
+              { icon: 'calendar_month', title: 'Smart Budgeting', desc: 'Auto-generated budgets based on your spending habits. Stay on track effortlessly.', comingSoon: true },
               { icon: 'insights', title: 'Visual Analytics', desc: 'Stunning charts and graphs that make it fun to explore your spending patterns.' },
-              { icon: 'bolt', title: 'Lightning Fast', desc: 'Built with Vite and React for instant load times and buttery smooth interactions.' },
+
             ].map((item, i) => (
-              <div key={i} className="group p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+              <div key={i} className="group p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 relative overflow-hidden">
                 <div className="size-14 bg-white rounded-2xl border border-slate-100 flex items-center justify-center mb-6 text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                   <span className="material-symbols-outlined text-2xl">{item.icon}</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  {item.title}
+                  {item.comingSoon && (
+                    <span className="bg-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full">Soon</span>
+                  )}
+                </h3>
                 <p className="text-slate-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
@@ -360,7 +491,7 @@ const Landing = () => {
           <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
             <div>
               <div className="flex items-center gap-2 font-black text-2xl text-slate-900 mb-6">
-                <div className="size-8 bg-blue-600 rounded-lg"></div>
+                <img src="/logo.gif" alt="OwnFinance" className="size-8 rounded-lg" />
                 OwnFinance.
               </div>
               <p className="text-slate-500 max-w-xs">Restoring privacy and simplicity to personal finance tracking.</p>
