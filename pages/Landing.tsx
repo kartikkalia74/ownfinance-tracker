@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { registerEmail, checkEmailExists } from '../services/emailService';
 
 // Declare gtag
 declare global {
@@ -183,7 +184,16 @@ const Landing = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isRegistered, setIsRegistered] = useState(false);
   const navigate = useNavigate();
+
+  // Check registration status on mount
+  useEffect(() => {
+    const registered = localStorage.getItem('ownfinance_beta_access') === 'true';
+    setIsRegistered(registered);
+  }, []);
 
   // Handle Scroll Effect for Header
   useEffect(() => {
@@ -210,24 +220,48 @@ const Landing = () => {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SHEET_URL;
 
+    if (!SCRIPT_URL) {
+      console.warn("VITE_GOOGLE_SHEET_URL not set. Email storage will not work.");
+      // Fallback for visual feedback if URL is missing
+      setStatus('loading');
+      setTimeout(() => {
+        setStatus('success');
+        trackEvent('email_submission_success', { event_category: 'conversion', event_label: 'success', value: 1 });
+        localStorage.setItem('ownfinance_beta_access', 'true');
+        setIsRegistered(true);
+        setTimeout(() => setShowRegister(false), 4000);
+      }, 1500);
+      return;
+    }
+
+    setStatus('loading');
     trackEvent('email_submitted', { event_category: 'engagement', event_label: 'early_access_signup', value: 1 });
 
-    if (btn) {
-      btn.innerText = "Verifying...";
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.innerText = "Welcome Aboard! 🚀";
-        btn.className = "w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all";
+    try {
+      const result = await registerEmail(email);
+
+      if (result.status === 'success') {
+        setStatus('success');
         trackEvent('email_submission_success', { event_category: 'conversion', event_label: 'success', value: 1 });
+        localStorage.setItem('ownfinance_beta_access', 'true');
+        setIsRegistered(true);
         setTimeout(() => {
           setShowRegister(false);
-        }, 2000);
-      }, 1500);
+          setStatus('idle');
+          setEmail('');
+        }, 4000);
+      } else {
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
+      }
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
@@ -262,12 +296,23 @@ const Landing = () => {
                     type="email"
                     required
                     autoFocus
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-lg font-medium text-slate-800 placeholder:text-slate-400"
                   />
                 </div>
-                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-xl shadow-blue-600/30 hover:shadow-blue-600/40 transition-all transform active:scale-[0.98]">
-                  Request Access
+                <button
+                  type="submit"
+                  disabled={status === 'loading' || status === 'success'}
+                  className={`w-full font-bold py-4 rounded-xl shadow-xl transition-all transform active:scale-[0.98] ${status === 'success'
+                    ? 'bg-green-500 text-white shadow-green-500/30'
+                    : status === 'error'
+                      ? 'bg-red-500 text-white shadow-red-500/30'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30 hover:shadow-blue-600/40'
+                    }`}
+                >
+                  {status === 'loading' ? 'Verifying...' : status === 'success' ? 'Welcome! Click Beta Access in Header 🚀' : status === 'error' ? 'Oops! Try Again' : 'Request Access'}
                 </button>
               </form>
               <p className="mt-6 text-center text-xs font-medium text-slate-400">No spam. Unsubscribe anytime.</p>
@@ -292,6 +337,12 @@ const Landing = () => {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                 </button>
               ))}
+              {isRegistered && (
+                <Link to="/beta-access" className="hover:text-blue-600 transition-colors relative group">
+                  Beta Access
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+                </Link>
+              )}
             </nav>
             <div className="flex items-center gap-4">
               <button
@@ -504,6 +555,9 @@ const Landing = () => {
                   <li><button onClick={() => setShowRegister(true)} className="hover:text-blue-600 transition-colors">Pricing</button></li>
                   <li><Link to="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link></li>
                   <li><Link to="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link></li>
+                  {isRegistered && (
+                    <li><Link to="/beta-access" className="hover:text-blue-600 transition-colors">Beta Access</Link></li>
+                  )}
                 </ul>
               </div>
               <div>

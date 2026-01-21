@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import BetaAccess from './pages/BetaAccess';
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/beta-access" element={<BetaAccess />} />
       </Routes>
     </HashRouter>
   );
